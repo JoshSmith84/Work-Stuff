@@ -1,4 +1,4 @@
-f = open("C:\\temp\\RiseESSList.txt", "w")
+f = open("C:\\temp\\ESSList.txt", "w")
 
 AllowedSenders = '
 AllowedSenderDomains = '

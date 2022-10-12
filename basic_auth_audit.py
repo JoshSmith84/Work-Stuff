@@ -1,5 +1,6 @@
 #! python3
-# Specific script to take output of O365 auth log and output needed data with deduplication
+# Specific script to take output of O365 auth log
+# and output needed data with deduplication
 # Author: Josh Smith
 
 import csv

@@ -1,9 +1,9 @@
-f = open("C:\\temp\\RiseESSList.txt", "a")
+f = open("C:\\temp\\ESSList.txt", "a")
 
 AllowedIPs = '54.174.209.165 '
 
 
-BlockedIPs= '167.89.13.221 167.89.67.124 167.89.83.148 167.89.95.233 209.85.222.66 '
+BlockedIPs=
 
 
 newAllowedList = ''
