@@ -12,7 +12,7 @@
 # Nowhere in the output does the parent company show.
 # So if running an amp on a client with sites,
 # be aware of this when looking at the final datafile.
-
+# TODO for now, support only for TPM checks, BDE/encryption status
 # Author: Josh Smith
 
 import win32com.client
@@ -21,13 +21,15 @@ import os
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
+from openpyxl.styles import Font
+from openpyxl.styles.alignment import Alignment
 import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %'
                                                 '(levelname)s - %'
                                                 '(message)s'
                     )
 
-# logging.disable(logging.CRITICAL)
+logging.disable(logging.CRITICAL)
 logging.debug('Start of program\n')
 
 # Variable initialization
@@ -63,21 +65,21 @@ for msg in list(messages):
     type_mo = re.search(type_regex, msg.Body)
     device_mo = re.search(device_regex, msg.Body)
     if cust_mo:
-        client_name = cust_mo.group(2)
+        client_name = cust_mo.group(2).strip()
         logging.debug(f'Client: {client_name}')
     else:
         print(f'No Customer Detected. Skipping Email Subject: {msg.Subject}...')
         continue
     if type_mo:
-        job_type = type_mo.group(1)
+        job_type = type_mo.group(1).strip()
         logging.debug(f'Job type: {job_type}')
-        job_name = type_mo.group(2)
+        job_name = type_mo.group(2).strip()
         logging.debug(f'Job name: {job_name}')
     else:
         print(f'No Job Detected. Skipping Email Subject: {msg.Subject}...')
         continue
     if device_mo:
-        device_name = device_mo.group(1)
+        device_name = device_mo.group(1).strip()
         logging.debug(f'Device name: {device_name}')
     else:
         print(f'No Device Detected. Skipping Email Subject: {msg.Subject}...')
@@ -91,18 +93,20 @@ for msg in list(messages):
     # logging.debug(f'Client Folder location: {client_folder}')
     ####
 
-    # TODO While keeping track of file's parent company, job,
+    # While keeping track of file's parent company, job,
     #  read output contents,
     #  and update client_name spreadsheet with device and details
 
     wb = Workbook()
     wb_file = parent_f + f'{client_name}.xlsx'
+
     # Check if client xlsx exists, if not create, and prep
     if os.path.exists(wb_file) is False:
         wb.save(wb_file)
         wb = load_workbook(wb_file)
         wb_sheet = wb['Sheet']
         wb_sheet.title = 'Encryption'
+        font_header = Font(size=12, bold=True)
         headers = [('Device Name', 'TPM Present?', 'TPM Active?',
                    'TPM Enabled?', 'Encryption Status')]
         for i in range(1, 6):
@@ -110,33 +114,68 @@ for msg in list(messages):
             wb_sheet.column_dimensions[col].width = 25
         for row in headers:
             wb_sheet.append(row)
+        for cell in wb_sheet['1:1']:
+            cell.font = font_header
+            cell.alignment = Alignment(horizontal='center')
+        wb_sheet.freeze_panes = 'A2'
         wb.save(wb_file)
-    # wb = load_workbook(wb_file)
-    # Handle TPM amp and populate variables
+
+    # Open client excel file, get current max row,
+    # iterate to check if device already exists
+    wb = load_workbook(wb_file)
+    sheet = wb['Encryption']
+    max_row = sheet.max_row
+    device_row = ''
+    for i in range(1, max_row + 1):
+        cell_data = sheet.cell(row=i, column=1).value
+        if device_name in cell_data:
+            device_row = i
+            break
+        else:
+            device_row = ''
+
+    # Handle TPM amp and populate spreadsheet
     if job_name == 'Windows TPM Monitoring':
         tpm_mo = re.search(tpm_regex, msg.Body)
         if tpm_mo:
-            tpm_present = tpm_mo.group(1)
-            tpm_active = tpm_mo.group(2)
-            tpm_enabled = tpm_mo.group(3)
+            tpm_present = tpm_mo.group(1).strip()
+            tpm_active = tpm_mo.group(2).strip()
+            tpm_enabled = tpm_mo.group(3).strip()
             logging.debug(f'tpm present?: {tpm_present}')
             logging.debug(f'tpm active?: {tpm_active}')
             logging.debug(f'tpm enabled?: {tpm_enabled}')
+            if device_row == '':
+                new_row = [(device_name, tpm_present,
+                            tpm_active, tpm_active)]
+                for row in new_row:
+                    sheet.append(row)
+            else:
+                sheet.cell(row=device_row, column=2).value = tpm_present
+                sheet.cell(row=device_row, column=3).value = tpm_active
+                sheet.cell(row=device_row, column=4).value = tpm_enabled
+
     # Handle encryption status check
     elif job_name == 'manage-bde -status':
         bde_mo = re.search(bde_regex, msg.Body)
         if bde_mo:
-            encrypt_status = bde_mo.group(2)
+            encrypt_status = bde_mo.group(2).strip()
             logging.debug(f'Encrypted status: {encrypt_status}')
+            if device_row == '':
+                new_row = [(device_name, '', '', '', encrypt_status)]
+                for row in new_row:
+                    sheet.append(row)
+            else:
+                sheet.cell(row=device_row, column=5).value = encrypt_status
+
     # Handle anything else right now
     else:
         print(f'No support added for {job_name} yet. Sorry.')
         logging.debug('End of msg process\n')
         continue
 
-    # TODO for now, support only for TPM checks, BDE/encryption status
+    wb.save(wb_file)
     logging.debug('End of msg process\n')
-    # msg.Move(outbox)
+    msg.Move(outbox)
 
 
 logging.debug('End of program')
