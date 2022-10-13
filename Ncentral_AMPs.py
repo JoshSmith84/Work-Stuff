@@ -126,6 +126,7 @@ for msg in list(messages):
 
     # Open client excel file, get current max row,
     # iterate to check if device already exists
+    #TODO put this little block in a function so I can pass sheet name
     wb = load_workbook(wb_file)
     sheet = wb['Encryption']
     max_row = sheet.max_row
