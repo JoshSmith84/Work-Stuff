@@ -13,7 +13,11 @@
 # Nowhere in the output does the parent company show.
 # So if running an amp on a client with sites,
 # be aware of this when looking at the final datafile.
-# TODO for now, support only for TPM checks, BDE/encryption status
+
+# TODO for now, support only for TPM checks, BDE/encryption status.
+#  Want to add support for on/offboarding status in lieu of
+#  relying on asset scans.
+
 # Author: Josh Smith
 
 import win32com.client
@@ -131,7 +135,10 @@ for msg in list(messages):
 
     # Open client excel file, get current max row,
     # iterate to check if device already exists
-    #TODO put this little block in a function so I can pass sheet name
+
+    #TODO put this little detection block in a function so I can pass sheet name
+    # and use it for other amps to keep everything in the same workbook
+
     wb = load_workbook(wb_file)
     sheet = wb['Encryption']
     max_row = sheet.max_row
