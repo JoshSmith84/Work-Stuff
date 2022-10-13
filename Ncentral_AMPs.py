@@ -50,11 +50,11 @@ messages = inbox.Items
 # regex to find zip files (Not in use, but keeping in case)
 zip_regex = re.compile(r"""^(.*?)(\.)(zip)$""")
 # regex to find Client names
-cust_regex = re.compile(r'''^.*(Customer: (.*?)) Executed By:''')
+cust_regex = re.compile(r'''^.*(Customer: (.*?))Executed By:''')
 # regex to find job type and amp/script name
 type_regex = re.compile(r'''^.*Type: (.*?) \[(.*?)\]''')
 # regex to find device name
-device_regex = re.compile(r'''^.*Device: (.*?) \[''')
+device_regex = re.compile(r'''^.*Agent (.*?)\[''')
 # regex to find bde status output
 bde_regex = re.compile(r'''(Conversion Status: )(.*?) (Percentage)''')
 # regex to find TPM status
@@ -90,7 +90,9 @@ for msg in list(messages):
     else:
         print(f'No Device Detected. Skipping Email Subject: {msg.Subject}...')
         continue
-
+    # Added check to handle some occasional false "successes"
+    if 'Task did not produce any output.' in msg.Body:
+        print(f'{device_name} did not produce any output')
     # client folder management (not sure if folders are necessary yet)
     ####
     # if os.path.exists(parent_f + client_name) is False:
