@@ -58,9 +58,9 @@ device_regex = re.compile(r'''^.*Agent (.*?)\[''')
 # regex to find bde status output
 bde_regex = re.compile(r'''(Conversion Status: )(.*?) (Percentage)''')
 # regex to find TPM status
-tpm_regex = re.compile(r'''oscpresent: (.*?)
-                           oscactive: (.*?)
-                           oscenabled: (.*?)
+tpm_regex = re.compile(r'''oscpresent:(.*?)
+                           oscactive:(.*?)
+                           oscenabled:(.*?)
                            Result''', re.VERBOSE)
 
 
@@ -119,12 +119,11 @@ for msg in list(messages):
                    'TPM Enabled?', 'Encryption Status')]
         for i in range(1, 6):
             col = get_column_letter(i)
-            wb_sheet.column_dimensions[col].width = 25
+            wb_sheet.column_dimensions[col].width = 23
         for row in headers:
             wb_sheet.append(row)
         for cell in wb_sheet['1:1']:
             cell.font = font_header
-            cell.alignment = Alignment(horizontal='center')
         wb_sheet.freeze_panes = 'A2'
         wb.save(wb_file)
 
@@ -155,7 +154,7 @@ for msg in list(messages):
             logging.debug(f'tpm enabled?: {tpm_enabled}')
             if device_row == '':
                 new_row = [(device_name, tpm_present,
-                            tpm_active, tpm_active)]
+                            tpm_active, tpm_enabled)]
                 for row in new_row:
                     sheet.append(row)
             else:
