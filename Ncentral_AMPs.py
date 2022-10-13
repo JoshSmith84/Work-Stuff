@@ -90,9 +90,11 @@ for msg in list(messages):
     else:
         print(f'No Device Detected. Skipping Email Subject: {msg.Subject}...')
         continue
+
     # Added check to handle some occasional false "successes"
     if 'Task did not produce any output.' in msg.Body:
-        print(f'{device_name} did not produce any output')
+        print(f'{client_name}: {device_name} did not produce any output')
+
     # client folder management (not sure if folders are necessary yet)
     ####
     # if os.path.exists(parent_f + client_name) is False:
@@ -119,7 +121,7 @@ for msg in list(messages):
                    'TPM Enabled?', 'Encryption Status')]
         for i in range(1, 6):
             col = get_column_letter(i)
-            wb_sheet.column_dimensions[col].width = 23
+            wb_sheet.column_dimensions[col].width = 25
         for row in headers:
             wb_sheet.append(row)
         for cell in wb_sheet['1:1']:
