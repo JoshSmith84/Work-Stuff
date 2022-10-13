@@ -34,9 +34,9 @@ logging.disable(logging.CRITICAL)
 logging.debug('Start of program\n')
 
 # Variable initialization
-with shelve.open('work_emails') as shelf:
-    email = shelf['josh_smith']
-parent_f = 'U:\\Joshua\\Work-Stuff\\AMP\\'
+with shelve.open('work_stuff') as shelf:
+    email = shelf['josh_email']
+    parent_f = shelf['out_folder']
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 inbox = outlook.Folders.Item(email).Folders[
     'Inbox'].Folders['Auto Policy']
