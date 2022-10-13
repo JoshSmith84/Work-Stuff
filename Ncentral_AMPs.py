@@ -35,7 +35,8 @@ logging.disable(logging.CRITICAL)
 logging.debug('Start of program\n')
 
 # Variable initialization
-with shelve.open('work_stuff') as shelf:
+db = 'U:\\Joshua\\Dropbox\\Dropbox\\Python\\Work Stuff\\work_stuff'
+with shelve.open(db) as shelf:
     email = shelf['josh_email']
     parent_f = shelf['out_folder']
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
