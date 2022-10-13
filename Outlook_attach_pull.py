@@ -14,7 +14,7 @@ def amp_output_pull(out_folder: str, in_ofolder: str, out_ofolder: str) -> None:
     especially if there are multiple accounts.
     Once found, the attachment is downloaded to the out_folder param,
     and the email is moved from in_ofolder param to the out_ofolder param
-    Needed imports to use this: win32.client, re
+    Needed imports to use this: win32.client_name, re
     :param out_folder: Folder on local PC to save attachments to
     :param in_ofolder: Outlook parent_f to search incoming emails.
     :param out_ofolder: Outlook parent_f to send email after it is processed
