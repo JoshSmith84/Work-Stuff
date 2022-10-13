@@ -50,6 +50,7 @@ outbox = outlook.Folders.Item(email).Folders[
     'Inbox'].Folders['Auto Policy'].Folders['Processed']
 messages = inbox.Items
 
+
 # REGEX block
 # regex to find zip files (Not in use, but keeping in case)
 zip_regex = re.compile(r"""^(.*?)(\.)(zip)$""")
@@ -77,8 +78,8 @@ for msg in list(messages):
     if cust_mo:
         client_name = cust_mo.group(2).strip()
         logging.debug(f'Client: {client_name}')
+        err_file = parent_f + f'{client_name}_errors.txt'
     else:
-        print(f'No Customer Detected. Skipping Email Subject: {msg.Subject}...')
         continue
     if type_mo:
         job_type = type_mo.group(1).strip()
@@ -86,13 +87,17 @@ for msg in list(messages):
         job_name = type_mo.group(2).strip()
         logging.debug(f'Job name: {job_name}')
     else:
-        print(f'No Job Detected. Skipping Email Subject: {msg.Subject}...')
+        with open(err_file, 'a') as file:
+            file.write(f'No Job Detected. '
+                       f'Skipping Email Subject: {msg.Subject}...\n')
         continue
     if device_mo:
         device_name = device_mo.group(1).strip()
         logging.debug(f'Device name: {device_name}')
     else:
-        print(f'No Device Detected. Skipping Email Subject: {msg.Subject}...')
+        with open(err_file, 'a') as file:
+            file.write(f'No Device Detected. '
+                       f'Skipping Email Subject: {msg.Subject}...\n')
         continue
 
     # client folder management (not sure if folders are necessary yet)
@@ -109,14 +114,13 @@ for msg in list(messages):
 
     wb = Workbook()
     wb_file = parent_f + f'{client_name}.xlsx'
-    err_file = parent_f + f'{client_name}_errors.txt'
 
     # Added check to handle some occasional false "successes"
     if 'Task did not produce any output.' in msg.Body:
-        with open(err_file) as file:
+        with open(err_file, 'a') as file:
             file.write(f'{client_name}: '
                        f'{device_name} did not produce any output for '
-                       f'{job_name}')
+                       f'{job_name}\n')
 
     # Check if client xlsx exists, if not create, and prep
     if os.path.exists(wb_file) is False:
@@ -192,7 +196,8 @@ for msg in list(messages):
     else:
         with open(err_file, 'a') as file:
             file.write(f'No support added for {job_name} yet. Sorry. '
-                       f'Skipping {client_name}: {device_name}: {job_name}...')
+                       f'Skipping {client_name}: '
+                       f'{device_name}: {job_name}...\n')
         logging.debug('End of msg process\n')
         continue
 
