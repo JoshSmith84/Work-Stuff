@@ -95,10 +95,6 @@ for msg in list(messages):
         print(f'No Device Detected. Skipping Email Subject: {msg.Subject}...')
         continue
 
-    # Added check to handle some occasional false "successes"
-    if 'Task did not produce any output.' in msg.Body:
-        print(f'{client_name}: {device_name} did not produce any output')
-
     # client folder management (not sure if folders are necessary yet)
     ####
     # if os.path.exists(parent_f + client_name) is False:
@@ -113,6 +109,14 @@ for msg in list(messages):
 
     wb = Workbook()
     wb_file = parent_f + f'{client_name}.xlsx'
+    err_file = parent_f + f'{client_name}_errors.txt'
+
+    # Added check to handle some occasional false "successes"
+    if 'Task did not produce any output.' in msg.Body:
+        with open(err_file) as file:
+            file.write(f'{client_name}: '
+                       f'{device_name} did not produce any output for '
+                       f'{job_name}')
 
     # Check if client xlsx exists, if not create, and prep
     if os.path.exists(wb_file) is False:
@@ -186,7 +190,9 @@ for msg in list(messages):
 
     # Handle anything else right now
     else:
-        print(f'No support added for {job_name} yet. Sorry.')
+        with open(err_file, 'a') as file:
+            file.write(f'No support added for {job_name} yet. Sorry. '
+                       f'Skipping {client_name}: {device_name}: {job_name}...')
         logging.debug('End of msg process\n')
         continue
 
