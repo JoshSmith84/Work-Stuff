@@ -35,8 +35,8 @@ logging.debug('Start of program\n')
 # Variable initialization
 parent_f = 'U:\\Joshua\\Work-Stuff\\AMP\\'
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-inbox = outlook.Folders.Item(3).Folders['Inbox'].Folders['Auto Policy']
-outbox = outlook.Folders.Item(3).Folders['Inbox'].Folders[
+inbox = outlook.Folders.Item(1).Folders['Inbox'].Folders['Auto Policy']
+outbox = outlook.Folders.Item(1).Folders['Inbox'].Folders[
     'Auto Policy'].Folders['Processed']
 messages = inbox.Items
 
