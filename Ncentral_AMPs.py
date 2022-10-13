@@ -18,6 +18,7 @@
 import win32com.client
 import re
 import os
+import shelve
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
@@ -33,11 +34,13 @@ logging.disable(logging.CRITICAL)
 logging.debug('Start of program\n')
 
 # Variable initialization
+with shelve.open('work_emails') as shelf:
+    email = shelf['josh_smith']
 parent_f = 'U:\\Joshua\\Work-Stuff\\AMP\\'
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-inbox = outlook.Folders.Item('Josh.Smith@purpleguys.com').Folders[
+inbox = outlook.Folders.Item(email).Folders[
     'Inbox'].Folders['Auto Policy']
-outbox = outlook.Folders.Item('Josh.Smith@purpleguys.com').Folders[
+outbox = outlook.Folders.Item(email).Folders[
     'Inbox'].Folders['Auto Policy'].Folders['Processed']
 messages = inbox.Items
 
