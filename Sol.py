@@ -1,12 +1,12 @@
 import csv
 
 # declare variables
-csv_filename1 = 'C:\\temp\\itarian.solalt.csv'
-csv_filename2 = 'C:\\temp\\ncentral-solalt.csv'
+csv_filename1 = 'C:\\temp\\itarian.sol.csv'
+csv_filename2 = 'C:\\temp\\ncentral-sol.csv'
 itarian_dict = {}
 ncentral_dict = {}
 missing_dict = {}
-solalt_missing = "C:\\temp\\causeway_missing.txt"
+solalt_missing = "C:\\temp\\sol_missing.txt"
 
 # open itarian csv and pull what I needed
 with open(csv_filename1, encoding='utf-8', newline='') as csv_file:

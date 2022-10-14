@@ -1,6 +1,6 @@
 f = open("C:\\temp\\ESSList.txt", "a")
 
-AllowedIPs = '54.174.209.165 '
+AllowedIPs =
 
 
 BlockedIPs=
