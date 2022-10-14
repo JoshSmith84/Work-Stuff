@@ -28,7 +28,6 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font
-from openpyxl.styles.alignment import Alignment
 import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %'
                                                 '(levelname)s - %'
@@ -59,7 +58,7 @@ cust_regex = re.compile(r'''^.*(Customer: (.*?))Executed By:''')
 # regex to find job type and amp/script name
 type_regex = re.compile(r'''^.*Type: (.*?) \[(.*?)\]''')
 # regex to find device name
-device_regex = re.compile(r'''^.*Agent (.*?)\[''')
+device_regex = re.compile(r'''^.*Device: (.*?)\[''')
 # regex to find bde status output
 bde_regex = re.compile(r'''(Conversion Status: )(.*?) (Percentage)''')
 # regex to find TPM status
