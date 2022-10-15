@@ -24,10 +24,9 @@ import win32com.client
 import re
 import os
 import shelve
-from openpyxl import Workbook
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.styles import Font
+from openpyxl.styles import Font, PatternFill
 import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %'
                                                 '(levelname)s - %'
@@ -49,6 +48,8 @@ outbox = outlook.Folders.Item(email).Folders[
     'Inbox'].Folders['Auto Policy'].Folders['Processed']
 messages = inbox.Items
 err_file = parent_f + 'AMP_errors.txt'
+gold = 'FFD966'
+red = 'E06666'
 
 
 # REGEX block
@@ -71,10 +72,11 @@ tpm_regex = re.compile(r'''oscpresent:(.*?)
 
 # iterate through all emails and process (Main block)
 for msg in list(messages):
-    # parse info from email body and organize into variables
+    # parse info from email body, organize into variables, and handle errors
     cust_mo = re.search(cust_regex, msg.Body)
     type_mo = re.search(type_regex, msg.Body)
     device_mo = re.search(device_regex, msg.Body)
+
     if cust_mo:
         client_name = cust_mo.group(2).strip()
         logging.debug(f'Client: {client_name}')
@@ -83,6 +85,7 @@ for msg in list(messages):
             file.write(f'\nNo Customer Detected. '
                        f'Skipping Email Subject: {msg.Subject}...\n')
         continue
+
     if type_mo:
         job_type = type_mo.group(1).strip()
         logging.debug(f'Job type: {job_type}')
@@ -93,6 +96,7 @@ for msg in list(messages):
             file.write(f'\nNo Job Detected. '
                        f'Skipping Email Subject: {msg.Subject}...\n')
         continue
+
     if device_mo:
         device_name = device_mo.group(1).strip()
         logging.debug(f'Device name: {device_name}')
@@ -100,6 +104,22 @@ for msg in list(messages):
         with open(err_file, 'a') as file:
             file.write(f'\nNo Device Detected. '
                        f'Skipping Email Subject: {msg.Subject}...\n')
+        continue
+
+    # Added check to handle some occasional false "successes"
+    if 'Task did not produce any output.' in msg.Body:
+        with open(err_file, 'a') as file:
+            file.write(f'\n{client_name}: '
+                       f'{device_name} did not produce any output for '
+                       f'{job_name}')
+        continue
+
+    # Added check for another possible error
+    if 'This policy has encountered an exception' in msg.Body:
+        with open(err_file, 'a') as file:
+            file.write(f'\n{client_name}: '
+                       f'{device_name} failed to run '
+                       f'{job_name}')
         continue
 
     # client folder management (not sure if folders are necessary yet)
@@ -110,19 +130,10 @@ for msg in list(messages):
     # logging.debug(f'Client Folder location: {client_folder}')
     ####
 
-    # While keeping track of file's parent company, job,
-    #  read output contents,
+    # While keeping track of file's parent company, job, read output contents,
     #  and update client_name spreadsheet with device and details
-
     wb = Workbook()
     wb_file = parent_f + f'{client_name}.xlsx'
-
-    # Added check to handle some occasional false "successes"
-    if 'Task did not produce any output.' in msg.Body:
-        with open(err_file, 'a') as file:
-            file.write(f'\n{client_name}: '
-                       f'{device_name} did not produce any output for '
-                       f'{job_name}')
 
     # Check if client xlsx exists, if not create, and prep
     if os.path.exists(wb_file) is False:
@@ -174,12 +185,20 @@ for msg in list(messages):
             if device_row == '':
                 new_row = [(device_name, tpm_present,
                             tpm_active, tpm_enabled)]
+                device_row = sheet.max_row + 1
                 for row in new_row:
                     sheet.append(row)
             else:
                 sheet.cell(row=device_row, column=2).value = tpm_present
                 sheet.cell(row=device_row, column=3).value = tpm_active
                 sheet.cell(row=device_row, column=4).value = tpm_enabled
+
+            # highlight any row with no TPM detected
+            if tpm_present == 'No TPM Detected':
+                for cell in sheet[device_row]:
+                    cell.fill = PatternFill(start_color=gold,
+                                            end_color=gold,
+                                            fill_type='solid')
 
     # Handle encryption status check
     elif job_name == 'manage-bde -status':
@@ -206,6 +225,5 @@ for msg in list(messages):
     wb.save(wb_file)
     logging.debug('End of msg process\n')
     msg.Move(outbox)
-
 
 logging.debug('End of program')
