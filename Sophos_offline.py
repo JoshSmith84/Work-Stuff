@@ -21,7 +21,6 @@ with open(old_stuff, encoding='utf-8', newline='') as csv_file:
     for row in reader:
         old_list.append(row)
 
-
 # open ncentral csv2 and pull what I needed
 with open(sophos_stuff, encoding='utf-8', newline='') as csv_file:
     headers = csv_file.readline().strip('\n').split(',')
