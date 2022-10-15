@@ -159,7 +159,6 @@ for msg in list(messages):
 
     #TODO put this little detection block in a function so I can pass sheet name
     # and use it for other amps to keep everything in the same workbook
-
     wb = load_workbook(wb_file)
     sheet = wb['Encryption']
     max_row = sheet.max_row
