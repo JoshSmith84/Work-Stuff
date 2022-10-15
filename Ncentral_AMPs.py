@@ -49,12 +49,9 @@ outbox = outlook.Folders.Item(email).Folders[
 messages = inbox.Items
 err_file = parent_f + 'AMP_errors.txt'
 gold = 'FFD966'
-red = 'E06666'
-
+light_red = 'E06666'
 
 # REGEX block
-# regex to find zip files (Not in use, but keeping in case)
-zip_regex = re.compile(r"""^(.*?)(\.)(zip)$""")
 # regex to find Client names
 cust_regex = re.compile(r'''^.*(Customer: (.*?))Executed By:''')
 # regex to find job type and amp/script name
