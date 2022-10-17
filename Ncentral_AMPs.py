@@ -80,7 +80,7 @@ for msg in list(messages):
     else:
         with open(err_file, 'a') as file:
             file.write(f'\nNo Customer Detected. '
-                       f'Skipping Email Subject: {msg.Subject}...\n')
+                       f'Skipping Email Subject: {msg.Subject}...')
         continue
 
     if type_mo:
@@ -91,7 +91,7 @@ for msg in list(messages):
     else:
         with open(err_file, 'a') as file:
             file.write(f'\nNo Job Detected. '
-                       f'Skipping Email Subject: {msg.Subject}...\n')
+                       f'Skipping Email Subject: {msg.Subject}...')
         continue
 
     if device_mo:
@@ -100,7 +100,7 @@ for msg in list(messages):
     else:
         with open(err_file, 'a') as file:
             file.write(f'\nNo Device Detected. '
-                       f'Skipping Email Subject: {msg.Subject}...\n')
+                       f'Skipping Email Subject: {msg.Subject}...')
         continue
 
     # Added check to handle some occasional false "successes"
@@ -133,6 +133,8 @@ for msg in list(messages):
     wb_file = parent_f + f'{client_name}.xlsx'
 
     # Check if client xlsx exists, if not create, and prep
+    # TODO: Add an On/Offboarded column.
+    #  I have found a good PS script to output app list
     if os.path.exists(wb_file) is False:
         wb.save(wb_file)
         wb = load_workbook(wb_file)
@@ -169,6 +171,13 @@ for msg in list(messages):
             device_row = ''
 
     # Handle TPM amp and populate spreadsheet
+    # TODO Add support for checking app list, change to onboarded? sheet,
+    #  Have a check for all common competing AV,
+    #  output found competing AV in the competing AV? column.
+    #  There could be two, but usually only one.
+    #  Also have columns for Sophos? AV Def? etc for all our toolsets,
+    #  so I can use this to see if devices have been
+    #  offboarded without updating assets
     if job_name == 'Windows TPM Monitoring':
         tpm_mo = re.search(tpm_regex, msg.Body)
         if tpm_mo:
