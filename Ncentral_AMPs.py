@@ -33,7 +33,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %'
                                                 '(message)s'
                     )
 
-logging.disable(logging.CRITICAL)
+# logging.disable(logging.CRITICAL)
 logging.debug('Start of program\n')
 
 # Variable initialization
@@ -186,11 +186,10 @@ for msg in list(messages):
             device_row = ''
 
     # Handle TPM amp and populate spreadsheet
-    # TODO Add support for checking app list, change to onboarded? sheet,
+    # TODO Add support for checking app list, change to On-Offboard sheet,
     #  Have a check for all common competing AV,
     #  output found competing AV in the competing AV? column.
-    #  There could be two, but usually only one.
-    #  Also have columns for Sophos? AV Def? etc for all our toolsets,
+    #  have columns for Sophos? AV Def? etc for all our toolsets,
     #  so I can use this to see if devices have been
     #  offboarded without updating assets
     if job_name == 'Windows TPM Monitoring':
