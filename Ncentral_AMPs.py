@@ -4,8 +4,8 @@
 # and job details from output email body. Parse data,
 # create/update master client_name excel files, move processed email when done.
 
-# Just select success and failure in amp setting;
-# do not select to send task output in file
+# For TPM and BDE: text output only
+# For software inventory amp, select "Send task output file in Email"
 
 # One small bug that I don't know how to solve yet:
 # output from devices that reside in sub-sites of a client show that site
@@ -65,6 +65,8 @@ tpm_regex = re.compile(r'''oscpresent:(.*?)
                            oscactive:(.*?)
                            oscenabled:(.*?)
                            Result''', re.VERBOSE)
+# regex to find zip files
+zip_regex = re.compile(r"""^(.*?)(\.)(xlsx)$""")
 
 
 # iterate through all emails and process (Main block)
@@ -133,24 +135,32 @@ for msg in list(messages):
     wb_file = parent_f + f'{client_name}.xlsx'
 
     # Check if client xlsx exists, if not create, and prep
-    # TODO: Add an On/Offboarded column.
-    #  I have found a good PS script to output app list
     if os.path.exists(wb_file) is False:
         wb.save(wb_file)
         wb = load_workbook(wb_file)
-        wb_sheet = wb['Sheet']
-        wb_sheet.title = 'Encryption'
+        encrypt_sheet = wb['Sheet']
+        encrypt_sheet.title = 'Encryption'
+        board_sheet = wb.create_sheet('On-Offboard')
         font_header = Font(size=12, bold=True)
-        headers = [('Device Name', 'TPM Present?', 'TPM Active?',
+        encrypt_headers = [('Device Name', 'TPM Present?', 'TPM Active?',
                    'TPM Enabled?', 'Encryption Status')]
-        for i in range(1, 6):
-            col = get_column_letter(i)
-            wb_sheet.column_dimensions[col].width = 25
-        for row in headers:
-            wb_sheet.append(row)
-        for cell in wb_sheet['1:1']:
+        board_headers = [('Device Name', 'Sophos?', 'Umbrella?',
+                          'Blackpoint SNAP?', 'Concierge?', 'Arctic Wolf?',
+                          'AV Defender?', 'Competing AV?')]
+        for sheet in wb.worksheets:
+            for i in range(1, 9):
+                col = get_column_letter(i)
+                sheet.column_dimensions[col].width = 25
+        for row in encrypt_headers:
+            encrypt_sheet.append(row)
+        for row in board_headers:
+            board_sheet.append(row)
+        for cell in encrypt_sheet['1:1']:
             cell.font = font_header
-        wb_sheet.freeze_panes = 'A2'
+        for cell in board_sheet['1:1']:
+            cell.font = font_header
+        encrypt_sheet.freeze_panes = 'A2'
+        board_sheet.freeze_panes = 'A2'
         wb.save(wb_file)
 
     # Open client excel file, get current max row,
