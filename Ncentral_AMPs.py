@@ -85,13 +85,24 @@ for msg in list(messages):
                        f'Skipping Email Subject: {msg.Subject}...')
         continue
 
+    # client folder management (now that we have client name)
+    if os.path.exists(parent_f + client_name) is False:
+        os.makedirs(parent_f + client_name)
+    client_folder = parent_f + client_name + '\\'
+    if os.path.exists(client_folder + 'temp') is False:
+        os.makedirs(client_folder + 'temp')
+    client_temp = client_folder + 'temp\\'
+    client_err_file = client_folder + f'{client_name}_AMP_errors.txt'
+    logging.debug(f'Client Folder location: {client_folder}')
+
+    # Error Checks continued
     if type_mo:
         job_type = type_mo.group(1).strip()
         logging.debug(f'Job type: {job_type}')
         job_name = type_mo.group(2).strip()
         logging.debug(f'Job name: {job_name}')
     else:
-        with open(err_file, 'a') as file:
+        with open(client_err_file, 'a') as file:
             file.write(f'\nNo Job Detected. '
                        f'Skipping Email Subject: {msg.Subject}...')
         continue
@@ -100,14 +111,14 @@ for msg in list(messages):
         device_name = device_mo.group(1).strip()
         logging.debug(f'Device name: {device_name}')
     else:
-        with open(err_file, 'a') as file:
+        with open(client_err_file, 'a') as file:
             file.write(f'\nNo Device Detected. '
                        f'Skipping Email Subject: {msg.Subject}...')
         continue
 
     # Added check to handle some occasional false "successes"
     if 'Task did not produce any output.' in msg.Body:
-        with open(err_file, 'a') as file:
+        with open(client_err_file, 'a') as file:
             file.write(f'\n{client_name}: '
                        f'{device_name} did not produce any output for '
                        f'{job_name}')
@@ -115,24 +126,18 @@ for msg in list(messages):
 
     # Added check for another possible error
     if 'This policy has encountered an exception' in msg.Body:
-        with open(err_file, 'a') as file:
+        with open(client_err_file, 'a') as file:
             file.write(f'\n{client_name}: '
                        f'{device_name} failed to run '
                        f'{job_name}')
         continue
 
-    # client folder management (not sure if folders are necessary yet)
-    ####
-    # if os.path.exists(parent_f + client_name) is False:
-    #     os.makedirs(parent_f + client_name)
-    # client_folder = parent_f + client_name + '\\'
-    # logging.debug(f'Client Folder location: {client_folder}')
-    ####
+
 
     # While keeping track of file's parent company, job, read output contents,
     #  and update client_name spreadsheet with device and details
     wb = Workbook()
-    wb_file = parent_f + f'{client_name}.xlsx'
+    wb_file = client_folder + f'{client_name}.xlsx'
 
     # Check if client xlsx exists, if not create, and prep
     if os.path.exists(wb_file) is False:
@@ -230,7 +235,7 @@ for msg in list(messages):
 
     # Handle anything else right now
     else:
-        with open(err_file, 'a') as file:
+        with open(client_err_file, 'a') as file:
             file.write(f'\nNo support added for {job_name} yet. Sorry. '
                        f'Skipping {client_name}: '
                        f'{device_name}: {job_name}...')
