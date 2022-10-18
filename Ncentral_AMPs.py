@@ -323,6 +323,7 @@ for msg in list(messages):
                         else:
                             board_sheet.cell(row=device_row,
                                              column=8).value = 'None Found'
+        # Delete the temp files when finished.
         temp_files = os.listdir(client_temp)
         for f in temp_files:
             os.remove(client_temp + f)
