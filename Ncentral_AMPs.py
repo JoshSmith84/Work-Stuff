@@ -207,6 +207,8 @@ for msg in list(messages):
     wb_file = client_folder + f'{client_name}.xlsx'
 
     # Check if client xlsx exists, if not create, and prep
+    #TODO put this is a little function. Start putting in spearate books.
+    # Also, new book/support for pulling encrpytion keys during offboarding.
     if os.path.exists(wb_file) is False:
         wb.save(wb_file)
         wb = load_workbook(wb_file)
