@@ -61,10 +61,16 @@ logging.disable(logging.CRITICAL)
 logging.debug('Start of program\n')
 
 # Variable initialization
+
+# Where the Work Stuff shelf resides
 db = 'U:\\Joshua\\Dropbox\\Dropbox\\Python\\Work Stuff\\work_stuff'
+
+# Pull email and out folder from shelf
 with shelve.open(db) as shelf:
     email = shelf['josh_email']
     parent_f = shelf['out_folder']
+
+# Outlook and folder variables
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 inbox = outlook.Folders.Item(email).Folders[
     'Inbox'].Folders['Auto Policy']
@@ -72,6 +78,8 @@ outbox = outlook.Folders.Item(email).Folders[
     'Inbox'].Folders['Auto Policy'].Folders['Processed']
 messages = inbox.Items
 err_file = parent_f + 'AMP_errors.txt'
+
+# colors and format variables
 gold = 'FFD966'
 light_red = 'E06666'
 white = 'ffffff'
@@ -83,6 +91,7 @@ gold_fill = PatternFill(start_color=gold, end_color=gold, fill_type='solid')
 white_fill = PatternFill(start_color=white, end_color=white, fill_type='solid')
 green_fill = PatternFill(start_color=green, end_color=green, fill_type='solid')
 
+# Tools dictionary. The integer values correspond to the column.
 tpg_tools = {'Sophos Endpoint': 2,
              'Umbrella Roaming Client': 3,
              'SnapAgent': 4,
@@ -91,6 +100,7 @@ tpg_tools = {'Sophos Endpoint': 2,
              'Security Manager AV Defender': 7,
              }
 
+# List of competing AV. Will update/add this list as needed.
 competing_av = ['Cylance Protect',
                 'Trend Micro',
                 'ESET Endpoint Security',
@@ -130,6 +140,7 @@ for msg in list(messages):
     type_mo = re.search(type_regex, msg.Body)
     device_mo = re.search(device_regex, msg.Body)
 
+    # Parse Client name
     if cust_mo:
         client_name = cust_mo.group(2).strip()
         logging.debug(f'Client: {client_name}')
@@ -149,7 +160,8 @@ for msg in list(messages):
     client_err_file = client_folder + f'{client_name}_AMP_errors.txt'
     logging.debug(f'Client Folder location: {client_folder}')
 
-    # Error Checks continued
+    # Parse job type and name (job type is not really used yet,
+    # but leaving it for future support if needed)
     if type_mo:
         job_type = type_mo.group(1).strip()
         logging.debug(f'Job type: {job_type}')
@@ -161,6 +173,7 @@ for msg in list(messages):
                        f'Skipping Email Subject: {msg.Subject}...')
         continue
 
+    # Parse device name
     if device_mo:
         device_name = device_mo.group(1).strip()
         logging.debug(f'Device name: {device_name}')
@@ -221,9 +234,6 @@ for msg in list(messages):
         encrypt_sheet.freeze_panes = 'A2'
         board_sheet.freeze_panes = 'A2'
         wb.save(wb_file)
-
-    # Open client excel file, get current max row,
-    # iterate to check if device already exists
 
     # Load client workbook
     wb = load_workbook(wb_file)
@@ -312,7 +322,10 @@ for msg in list(messages):
                                              column=v).value = 'Missing'
                             board_sheet.cell(row=device_row,
                                              column=v).fill = red_fill
-                    # Look for competing AV
+
+                    # Look for competing AV, break loop when first is found.
+                    # Others may be present,
+                    # but we'll be working on this PC anyway if one is found
                     for apps in competing_av:
                         if apps in app_data:
                             board_sheet.cell(row=device_row,
@@ -338,8 +351,11 @@ for msg in list(messages):
         logging.debug('End of msg process\n')
         continue
 
+    # Save the spreadsheet
     wb.save(wb_file)
-    logging.debug('End of msg process\n')
+
+    # Move the processed message to the processed folder.
     msg.Move(outbox)
+    logging.debug('End of msg process\n')
 
 logging.debug('End of program')
