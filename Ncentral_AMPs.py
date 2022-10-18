@@ -14,9 +14,7 @@
 # So if running an amp on a client with sites,
 # be aware of this when looking at the final datafile.
 
-# TODO for now, support only for TPM checks, BDE/encryption status.
-#  Want to add support for on/offboarding status in lieu of
-#  relying on asset scans.
+# for now, support for TPM checks, BDE/encryption status, and live "asset scans"
 
 # Author: Josh Smith
 
@@ -24,6 +22,7 @@ import win32com.client
 import re
 import os
 import shelve
+from zipfile import ZipFile
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill
@@ -33,7 +32,32 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %'
                                                 '(message)s'
                     )
 
-# logging.disable(logging.CRITICAL)
+
+def device_check(sheet: str, device: str) -> int:
+    """
+    Pass the needed sheet name and device name.
+    Iterate through the sheet and look for the existence of the device name.
+    If the device is present, return the row it resides in,
+    if the device is not present return empty value for device.
+    Needed modules: openpyxl, Workbook
+    :param sheet: The sheet name to check
+    :param device: The device name to search for
+    :return: The row number the device resides in.
+    """
+    wb_sheet = wb[sheet]
+    max_row = wb_sheet.max_row
+    device_row = ''
+    for i in range(1, max_row + 1):
+        cell_data = wb_sheet.cell(row=i, column=1).value
+        if device in cell_data:
+            device_row = i
+            break
+        else:
+            device_row = ''
+    return device_row
+
+
+logging.disable(logging.CRITICAL)
 logging.debug('Start of program\n')
 
 # Variable initialization
@@ -50,7 +74,35 @@ messages = inbox.Items
 err_file = parent_f + 'AMP_errors.txt'
 gold = 'FFD966'
 light_red = 'E06666'
+white = 'ffffff'
+green = '93c47d'
+red_fill = PatternFill(start_color=light_red,
+                       end_color=light_red,
+                       fill_type='solid')
+gold_fill = PatternFill(start_color=gold, end_color=gold, fill_type='solid')
+white_fill = PatternFill(start_color=white, end_color=white, fill_type='solid')
+green_fill = PatternFill(start_color=green, end_color=green, fill_type='solid')
 
+tpg_tools = {'Sophos Endpoint': 2,
+             'Umbrella Roaming Client': 3,
+             'SnapAgent': 4,
+             'The Purple Guys Support Concierge':5,
+             'Arctic Wolf Agent':6,
+             'Security Manager AV Defender': 7,
+             }
+
+competing_av = ['Cylance Protect',
+                'Trend Micro',
+                'ESET Endpoint Security',
+                'webroot',
+                'COMODO',
+                'VIPRE',
+                'Bitdefender',
+                'Dell Protected Workspace',
+                ]
+
+# TODO add regexes for the competing AV above. TO make it more trustworthy.
+#  So far, testing is going well though.
 # REGEX block
 # regex to find Client names
 cust_regex = re.compile(r'''^.*(Customer: (.*?))Executed By:''')
@@ -66,7 +118,9 @@ tpm_regex = re.compile(r'''oscpresent:(.*?)
                            oscenabled:(.*?)
                            Result''', re.VERBOSE)
 # regex to find zip files
-zip_regex = re.compile(r"""^(.*?)(\.)(xlsx)$""")
+zip_regex = re.compile(r"""^(.*?)(\.)(zip)$""")
+# regex to find txt files
+txt_regex = re.compile(r"""^(.*?)(\.)(txt)$""")
 
 
 # iterate through all emails and process (Main block)
@@ -171,28 +225,14 @@ for msg in list(messages):
     # Open client excel file, get current max row,
     # iterate to check if device already exists
 
-    #TODO put this little detection block in a function so I can pass sheet name
-    # and use it for other amps to keep everything in the same workbook
+    # Load client workbook
     wb = load_workbook(wb_file)
-    sheet = wb['Encryption']
-    max_row = sheet.max_row
-    device_row = ''
-    for i in range(1, max_row + 1):
-        cell_data = sheet.cell(row=i, column=1).value
-        if device_name in cell_data:
-            device_row = i
-            break
-        else:
-            device_row = ''
+    encrypt_sheet = wb['Encryption']
+    board_sheet = wb['On-Offboard']
 
     # Handle TPM amp and populate spreadsheet
-    # TODO Add support for checking app list, change to On-Offboard sheet,
-    #  Have a check for all common competing AV,
-    #  output found competing AV in the competing AV? column.
-    #  have columns for Sophos? AV Def? etc for all our toolsets,
-    #  so I can use this to see if devices have been
-    #  offboarded without updating assets
     if job_name == 'Windows TPM Monitoring':
+        device_row = device_check('Encryption', device_name)
         tpm_mo = re.search(tpm_regex, msg.Body)
         if tpm_mo:
             tpm_present = tpm_mo.group(1).strip()
@@ -204,23 +244,22 @@ for msg in list(messages):
             if device_row == '':
                 new_row = [(device_name, tpm_present,
                             tpm_active, tpm_enabled)]
-                device_row = sheet.max_row + 1
+                device_row = encrypt_sheet.max_row + 1
                 for row in new_row:
-                    sheet.append(row)
+                    encrypt_sheet.append(row)
             else:
-                sheet.cell(row=device_row, column=2).value = tpm_present
-                sheet.cell(row=device_row, column=3).value = tpm_active
-                sheet.cell(row=device_row, column=4).value = tpm_enabled
+                encrypt_sheet.cell(row=device_row, column=2).value = tpm_present
+                encrypt_sheet.cell(row=device_row, column=3).value = tpm_active
+                encrypt_sheet.cell(row=device_row, column=4).value = tpm_enabled
 
             # highlight any row with no TPM detected
             if tpm_present == 'No TPM Detected':
-                for cell in sheet[device_row]:
-                    cell.fill = PatternFill(start_color=gold,
-                                            end_color=gold,
-                                            fill_type='solid')
+                for cell in encrypt_sheet[device_row]:
+                    cell.fill = gold_fill
 
     # Handle encryption status check
     elif job_name == 'manage-bde -status':
+        device_row = device_check('Encryption', device_name)
         bde_mo = re.search(bde_regex, msg.Body)
         if bde_mo:
             encrypt_status = bde_mo.group(2).strip()
@@ -228,9 +267,66 @@ for msg in list(messages):
             if device_row == '':
                 new_row = [(device_name, '', '', '', encrypt_status)]
                 for row in new_row:
-                    sheet.append(row)
+                    encrypt_sheet.append(row)
             else:
-                sheet.cell(row=device_row, column=5).value = encrypt_status
+                encrypt_sheet.cell(
+                    row=device_row, column=5).value = encrypt_status
+
+    # Handle Software inventory
+    elif job_name == 'Simple Software Inventory':
+        device_row = device_check('On-Offboard', device_name)
+        for attach in msg.Attachments:
+            mo = re.search(zip_regex, str(attach))
+            if mo:
+                # If found, save attachment and move email
+                temp_file = client_temp + device_name + '_' + attach.FileName
+                attach.SaveAsFile(temp_file)
+
+                # Unzip file
+                with ZipFile(temp_file) as zip_obj:
+                    zip_obj.extractall(path=client_temp)
+
+                # There should only be one, but iterate anyway
+                files = os.listdir(client_temp)
+                for f in files:
+                    txt_mo = re.search(txt_regex, f)
+                    if txt_mo:
+                        # open and parse
+                        with open(client_temp + f, 'r') as out_file:
+                            app_data = out_file.read()
+                    else:
+                        continue
+                    if device_row == '':
+                        device_row = board_sheet.max_row +1
+                    board_sheet.cell(row=device_row,
+                                     column=1).value = device_name
+                    # Look for TPG apps
+                    for k, v in tpg_tools.items():
+                        if k in app_data:
+                            board_sheet.cell(row=device_row,
+                                             column=v).value= 'Installed'
+                            board_sheet.cell(row=device_row,
+                                             column=v).fill = green_fill
+                        else:
+                            board_sheet.cell(row=device_row,
+                                             column=v).value = 'Missing'
+                            board_sheet.cell(row=device_row,
+                                             column=v).fill = red_fill
+                    # Look for competing AV
+                    for apps in competing_av:
+                        if apps in app_data:
+                            board_sheet.cell(row=device_row,
+                                             column=8).value = apps
+                            board_sheet.cell(row=device_row,
+                                             column=8).fill = gold_fill
+                            break
+                        else:
+                            board_sheet.cell(row=device_row,
+                                             column=8).value = 'None Found'
+        temp_files = os.listdir(client_temp)
+        for f in temp_files:
+            os.remove(client_temp + f)
+
 
     # Handle anything else right now
     else:
