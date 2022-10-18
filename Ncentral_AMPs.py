@@ -290,7 +290,7 @@ for msg in list(messages):
         for attach in msg.Attachments:
             mo = re.search(zip_regex, str(attach))
             if mo:
-                # If found, save attachment and move email
+                # If found, save attachment
                 temp_file = client_temp + device_name + '_' + attach.FileName
                 attach.SaveAsFile(temp_file)
 
