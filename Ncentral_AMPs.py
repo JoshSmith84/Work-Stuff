@@ -61,7 +61,6 @@ logging.disable(logging.CRITICAL)
 logging.debug('Start of program\n')
 
 # Variable initialization
-
 # Where the Work Stuff shelf resides
 db = 'U:\\Joshua\\Dropbox\\Dropbox\\Python\\Work Stuff\\work_stuff'
 
