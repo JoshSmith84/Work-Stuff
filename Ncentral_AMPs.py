@@ -17,7 +17,6 @@
 # Regardless, if this method is not followed it will still parse
 # client name from body, but that may end up being a site name...
 
-
 # for now, support for TPM checks, BDE/encryption status, and live "asset scans"
 
 # Author: Josh Smith
@@ -137,7 +136,6 @@ zip_regex = re.compile(r"""^(.*?)(\.)(zip)$""")
 # regex to find txt files
 txt_regex = re.compile(r"""^(.*?)(\.)(txt)$""")
 
-
 # iterate through all emails and process (Main block)
 for msg in list(messages):
     # parse info from email body, organize into variables, and handle errors
@@ -160,7 +158,6 @@ for msg in list(messages):
     if client_mo:
         client_name = client_mo.group(1).strip()
         logging.debug(f'Client v2: {client_name}')
-
 
     # client folder management (now that we have client name)
     if os.path.exists(parent_f + client_name) is False:
