@@ -198,8 +198,6 @@ for msg in list(messages):
                        f'{job_name}')
         continue
 
-
-
     # While keeping track of file's parent company, job, read output contents,
     #  and update client_name spreadsheet with device and details
     wb = Workbook()
