@@ -94,11 +94,11 @@ white_fill = PatternFill(start_color=white, end_color=white, fill_type='solid')
 green_fill = PatternFill(start_color=green, end_color=green, fill_type='solid')
 
 # Tools dictionary. The integer values correspond to the column.
-tpg_tools = {'Sophos Endpoint': 2,
-             'Umbrella Roaming Client': 3,
-             'SnapAgent': 4,
+tpg_tools = {'Arctic Wolf Agent': 2,
+             'SnapAgent': 3,
+             'Umbrella Roaming Client': 4,
              'The Purple Guys Support Concierge':5,
-             'Arctic Wolf Agent':6,
+             'Sophos Endpoint':6,
              'Security Manager AV Defender': 7,
              }
 
@@ -225,8 +225,8 @@ for msg in list(messages):
         font_header = Font(size=12, bold=True)
         encrypt_headers = [('Device Name', 'TPM Present?', 'TPM Active?',
                    'TPM Enabled?', 'Encryption Status')]
-        board_headers = [('Device Name', 'Sophos?', 'Umbrella?',
-                          'Blackpoint SNAP?', 'Concierge?', 'Arctic Wolf?',
+        board_headers = [('Device Name', 'Arctic Wolf?', 'Blackpoint SNAP?',
+                          'Umbrella?', 'Concierge?', 'Sophos?',
                           'AV Defender?', 'Competing AV?')]
         for sheet in wb.worksheets:
             for i in range(1, 9):
