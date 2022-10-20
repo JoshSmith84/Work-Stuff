@@ -7,12 +7,16 @@
 # For TPM and BDE: text output only
 # For software inventory amp, select "Send task output file in Email"
 
-# One small bug that I don't know how to solve yet:
+# One small issue:
 # output from devices that reside in sub-sites of a client show that site
 # and only that site as the customer.
-# Nowhere in the output does the parent company show.
-# So if running an amp on a client with sites,
-# be aware of this when looking at the final datafile.
+
+# To solve this, the job name muct be named in ncentral as client name -
+# whatever. Will need to specify the same client name exactly inclusing
+# case(though I could fold it...) for this to output into same worksheet.
+# Regardless, if this method is not followed it will still parse
+# client name from body, but that may end up being a site name...
+
 
 # for now, support for TPM checks, BDE/encryption status, and live "asset scans"
 
@@ -115,6 +119,8 @@ competing_av = ['Cylance Protect',
 # REGEX block
 # regex to find Client names
 cust_regex = re.compile(r'''^.*(Customer: (.*?))Executed By:''')
+# regex to find Client names v2
+client_regex = re.compile(r'''^Scheduled Task (.*?) -''')
 # regex to find job type and amp/script name
 type_regex = re.compile(r'''^.*Type: (.*?) \[(.*?)\]''')
 # regex to find device name
@@ -136,6 +142,7 @@ txt_regex = re.compile(r"""^(.*?)(\.)(txt)$""")
 for msg in list(messages):
     # parse info from email body, organize into variables, and handle errors
     cust_mo = re.search(cust_regex, msg.Body)
+    client_mo = re.search(client_regex, msg.Subject)
     type_mo = re.search(type_regex, msg.Body)
     device_mo = re.search(device_regex, msg.Body)
 
@@ -148,6 +155,12 @@ for msg in list(messages):
             file.write(f'\nNo Customer Detected. '
                        f'Skipping Email Subject: {msg.Subject}...')
         continue
+
+    # Client name version 2. If set correctly, overwrite the above parse.
+    if client_mo:
+        client_name = client_mo.group(1).strip()
+        logging.debug(f'Client v2: {client_name}')
+
 
     # client folder management (now that we have client name)
     if os.path.exists(parent_f + client_name) is False:
