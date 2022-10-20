@@ -11,8 +11,8 @@
 # output from devices that reside in sub-sites of a client show that site
 # and only that site as the customer.
 
-# To solve this, the job name muct be named in ncentral as client name -
-# whatever. Will need to specify the same client name exactly inclusing
+# To solve this, the job name must be named in ncentral as client name -
+# whatever. Will need to specify the same client name exactly including
 # case(though I could fold it...) for this to output into same worksheet.
 # Regardless, if this method is not followed it will still parse
 # client name from body, but that may end up being a site name...
@@ -316,7 +316,7 @@ for msg in list(messages):
                     else:
                         continue
                     if device_row == '':
-                        device_row = board_sheet.max_row +1
+                        device_row = board_sheet.max_row + 1
                     board_sheet.cell(row=device_row,
                                      column=1).value = device_name
                     # Look for TPG apps
