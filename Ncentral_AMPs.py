@@ -154,7 +154,7 @@ for msg in list(messages):
                        f'Skipping Email Subject: {msg.Subject}...')
         continue
 
-    # Client name version 2. If set correctly, overwrite the above parse.
+    # Client name version 2. If set correctly, overwrite the above.
     if client_mo:
         client_name = client_mo.group(1).strip()
         logging.debug(f'Client v2: {client_name}')
