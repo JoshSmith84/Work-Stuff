@@ -98,7 +98,7 @@ tpg_tools = {'Arctic Wolf Agent': 2,
              'SnapAgent': 3,
              'Umbrella Roaming Client': 4,
              'The Purple Guys Support Concierge':5,
-             'Sophos Endpoint':6,
+             'Sophos Endpoint Agent':6,
              'Security Manager AV Defender': 7,
              }
 
@@ -156,8 +156,9 @@ for msg in list(messages):
 
     # Client name version 2. If set correctly, overwrite the above.
     if client_mo:
-        client_name = client_mo.group(1).strip()
-        logging.debug(f'Client v2: {client_name}')
+        if client_mo.group(1).strip() != 'Automation Policy':
+            client_name = client_mo.group(1).strip()
+            logging.debug(f'Client v2: {client_name}')
 
     # client folder management (now that we have client name)
     if os.path.exists(parent_f + client_name) is False:
@@ -349,7 +350,6 @@ for msg in list(messages):
         temp_files = os.listdir(client_temp)
         for f in temp_files:
             os.remove(client_temp + f)
-
 
     # Handle anything else right now
     else:
