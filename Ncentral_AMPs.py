@@ -36,18 +36,17 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %'
                     )
 
 
-def device_check(sheet: str, device: str) -> int:
+def device_check(wb_sheet, device: str) -> int:
     """
     Pass the needed sheet name and device name.
     Iterate through the sheet and look for the existence of the device name.
     If the device is present, return the row it resides in,
     if the device is not present return empty value for device.
     Needed modules: openpyxl, Workbook
-    :param sheet: The sheet name to check
+    :param wb_sheet: The sheet to check
     :param device: The device name to search for
     :return: The row number the device resides in.
     """
-    wb_sheet = wb[sheet]
     max_row = wb_sheet.max_row
     device_row = ''
     for i in range(1, max_row + 1):
@@ -252,7 +251,7 @@ for msg in list(messages):
 
     # Handle TPM amp and populate spreadsheet
     if job_name == 'Windows TPM Monitoring':
-        device_row = device_check('Encryption', device_name)
+        device_row = device_check(encrypt_sheet, device_name)
         tpm_mo = re.search(tpm_regex, msg.Body)
         if tpm_mo:
             tpm_present = tpm_mo.group(1).strip()
@@ -279,7 +278,7 @@ for msg in list(messages):
 
     # Handle encryption status check
     elif job_name == 'manage-bde -status':
-        device_row = device_check('Encryption', device_name)
+        device_row = device_check(encrypt_sheet, device_name)
         bde_mo = re.search(bde_regex, msg.Body)
         if bde_mo:
             encrypt_status = bde_mo.group(2).strip()
@@ -294,7 +293,7 @@ for msg in list(messages):
 
     # Handle Software inventory
     elif job_name == 'Simple Software Inventory':
-        device_row = device_check('On-Offboard', device_name)
+        device_row = device_check(board_sheet, device_name)
         for attach in msg.Attachments:
             mo = re.search(zip_regex, str(attach))
             if mo:
@@ -312,7 +311,8 @@ for msg in list(messages):
                     txt_mo = re.search(txt_regex, f)
                     if txt_mo:
                         # open and parse
-                        with open(client_temp + f, 'r') as out_file:
+                        with open(client_temp + f, 'r',
+                                  encoding='utf-8') as out_file:
                             app_data = out_file.read()
                     else:
                         continue
