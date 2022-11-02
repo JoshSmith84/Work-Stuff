@@ -1,25 +1,26 @@
 #! python3
-# Ncentral_AMPs.py - parse AMP output emails from Outlook,
-# while also keeping track of client_name
-# and job details from output email body. Parse data,
-# create/update master client_name excel files, move processed email when done.
+""" Ncentral_AMPs.py - parse AMP output emails from Outlook,
+while also keeping track of client_name
+and job details from output email body. Parse data,
+create/update master client_name excel files, move processed email when done.
 
-# For TPM and BDE: text output only
-# For software inventory amp, select "Send task output file in Email"
+For TPM and BDE: text output only
+For software inventory amp, select "Send task output file in Email"
 
-# One small issue:
-# output from devices that reside in sub-sites of a client show that site
-# and only that site as the customer.
+One small issue:
+output from devices that reside in sub-sites of a client show that site
+and only that site as the customer.
 
-# To solve this, the job name must be named in ncentral as client name -
-# whatever. Will need to specify the same client name exactly including
-# case(though I could fold it...) for this to output into same worksheet.
-# Regardless, if this method is not followed it will still parse
-# client name from body, but that may end up being a site name...
+To solve this, the job name must be named in ncentral as client name -
+whatever. Will need to specify the same client name exactly including
+case(though I could fold it...) for this to output into same worksheet.
+Regardless, if this method is not followed it will still parse
+client name from body, but that may end up being a site name...
 
-# for now, support for TPM checks, BDE/encryption status, and live "asset scans"
+For now, support for TPM checks, BDE/encryption status, and live "asset scans"
 
-# Author: Josh Smith
+Author: Josh Smith
+"""
 
 import win32com.client
 import re
