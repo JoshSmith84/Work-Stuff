@@ -306,7 +306,7 @@ for msg in list(messages):
                 with ZipFile(temp_file) as zip_obj:
                     zip_obj.extractall(path=client_temp)
 
-                # There should only be one, but iterate anyway
+                # Skip the zip and only open txt
                 files = os.listdir(client_temp)
                 for f in files:
                     txt_mo = re.search(txt_regex, f)
