@@ -111,6 +111,7 @@ competing_av = ['Cylance Protect',
                 'VIPRE',
                 'Bitdefender',
                 'Dell Protected Workspace',
+                'Emsisoft Anti-Malware',
                 ]
 
 # TODO add regexes for the competing AV above. TO make it more trustworthy.

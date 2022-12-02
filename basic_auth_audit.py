@@ -26,16 +26,16 @@ def remove_dup(a: list) -> None:
         i += 1
 
 
-application_window = tk.Tk()
+root = tk.Tk()
 new_list = []
 my_filetypes = [('csv files', '.csv')]
 
 
 # Ask the user to select a single file name.
-in_file = filedialog.askopenfilename(parent=application_window,
-                                    initialdir=os.getcwd(),
-                                    title="Please select an input file:",
-                                    filetypes=my_filetypes)
+in_file = filedialog.askopenfilename(parent=root,
+                                     initialdir=os.getcwd(),
+                                     title="Please select an input file:",
+                                     filetypes=my_filetypes)
 
 
 # open auth report csv and pull only what is needed
@@ -62,7 +62,7 @@ remove_dup(new_list)
 # Commented this out due to user input. Rather select and go.
 # However, this overwrites origin file as is
 
-# out_file = filedialog.asksaveasfilename(parent=application_window,
+# out_file = filedialog.asksaveasfilename(parent=root,
 #                                       initialdir=os.getcwd(),
 #                                       title="Please select a file to save:",
 #                                       filetypes=my_filetypes)
