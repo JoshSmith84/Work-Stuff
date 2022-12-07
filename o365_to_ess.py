@@ -52,7 +52,6 @@ blocked_ips_list = []
 email_headers = ['Email Address', 'Policy (block, exempt, quarantine)', 'Comment (optional)']
 ip_headers = ['IP Address', 'Netmask', 'Policy (block, exempt, quarantine)', 'Comment (optional)']
 
-
 re_organize(allowed_senders_raw, allowed_senders_list)
 re_organize(allowed_domains_raw, allowed_domains_list)
 re_organize(blocked_senders_raw, blocked_senders_list)
