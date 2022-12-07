@@ -1,8 +1,7 @@
 # umbrella_cleanup.py: script to drive browser to go through all clients
 # and see if auto-delete after 30 days is enabled.
 # If not enabled, enable. post status in csv to report on progress.
-# Since it will be checking and only enabling those disabled,
-# that will make this easier during debug process.
+
 
 # Author: Josh Smith
 
