@@ -21,7 +21,6 @@ in_file = filedialog.askopenfilename(parent=root,
                                      filetypes=my_filetypes)
 # initialize input list
 rows = []
-domain_rows = []
 timestr = time.strftime("%Y%m%d-%H%M%S")
 headers = ['Email Address',
            'Policy (block, exempt, quarantine)',
@@ -37,51 +36,45 @@ with open(in_file, encoding='utf-8', newline='') as csv_file:
     for row in reader:
         rows.append(row)
 
-# init new list and edit to cuda out
-# (TODO need to re-order this for more efficient script)
 new_list = []
+final_list = []
 
-for i in rows:
+# Only move unanimous block/allow to final list.
+i = 0
+while i < len(rows):
+    j = i + 1
+    conflict_detect = 0
+    unanimous = 0
+    while j < len(rows):
+        if rows[i][0] == rows[j][0]:
+            if rows[i][4] != rows[j][4]:
+                conflict_detect += 1
+                del rows[j]
+                continue
+            else:
+                unanimous += 1
+                del rows[j]
+        else:
+            j += 1
+    if conflict_detect > 0:
+        del rows[i]
+    elif conflict_detect == 0 and unanimous > 0:
+        new_list.append(rows[i])
+        i += 1
+    else:
+        i += 1
+
+# Format unanimous list for cuda.
+for i in new_list:
     if i[4] == 'Quarantine' or len(i[0]) > 40:
         continue
     elif i[0] == '<>':
         continue
     else:
         if i[4] == 'Block':
-            new_list.append([f"{i[0]}", "block", "from Mimecast"])
+            final_list.append([f"{i[0]}", "block", "from Mimecast"])
         elif i[4] == 'Permit':
-            new_list.append([f"{i[0]}", "exempt", "from Mimecast"])
-
-final_list = []
-
-# Only move unanimous block/allow to final list.
-# TODO clean this up.
-#  No need to delete from new_list since we're not outputting that
-i = 0
-while i < len(new_list):
-    j = i + 1
-    d_orig = 0
-    while j < len(new_list):
-        if new_list[i][0] == new_list[j][0]:
-            if new_list[i][1] != new_list[j][1]:
-                d_orig += 1
-                del new_list[j]
-                continue
-            else:
-                final_list.append(new_list[j])
-                del new_list[j]
-        else:
-            j += 1
-    if d_orig == 1:
-        del new_list[i]
-        continue
-    else:
-        i += 1
-
-top_doms = ['google.com', 'gmail.com', 'yahoo.com',
-            'outlook.com', 'aol.com', 'hotmail.com',
-            'bellsouth.net', 'mail.com', 'microsoft.com',
-            ]
+            final_list.append([f"{i[0]}", "exempt", "from Mimecast"])
 
 # Remove any remaining true duplicates
 remove_dup(final_list)
