@@ -38,6 +38,11 @@ with open(in_file, encoding='utf-8', newline='') as csv_file:
 
 new_list = []
 final_list = []
+top_domains = ['google.com', 'gmail.com', 'yahoo.com',
+            'outlook.com', 'aol.com', 'hotmail.com',
+            'bellsouth.net', 'mail.com', 'microsoft.com',
+            ]
+
 
 # Only move unanimous block/allow to final list.
 i = 0
@@ -69,6 +74,8 @@ for i in new_list:
     if i[4] == 'Quarantine' or len(i[0]) > 40:
         continue
     elif i[0] == '<>':
+        continue
+    elif i[0] in top_domains:
         continue
     else:
         if i[4] == 'Block':
