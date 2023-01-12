@@ -65,15 +65,15 @@ while i < len(rows):
     if conflict_detect > 0:
         del rows[i]
     elif conflict_detect == 0 and unanimous > 0:
-        if list_size < 10000 and unanimous > 0:
+        if list_size <= 10000 and unanimous > 0:
             new_list.append(rows[i])
-        elif 20000 > list_size > 10000 and unanimous > 1:
+        elif 20000 >= list_size > 10000 and unanimous > 1:
             new_list.append(rows[i])
-        elif 30000 > list_size > 20000 and unanimous > 2:
+        elif 30000 >= list_size > 20000 and unanimous > 2:
             new_list.append(rows[i])
-        elif 40000 > list_size > 30000 and unanimous > 3:
+        elif 40000 >= list_size > 30000 and unanimous > 3:
             new_list.append(rows[i])
-        elif 50000 > list_size > 40000 and unanimous > 4:
+        elif 50000 >= list_size > 40000 and unanimous > 4:
             new_list.append(rows[i])
         elif list_size > 50000 and unanimous > 5:
             new_list.append(rows[i])
@@ -99,9 +99,11 @@ for i in new_list:
 remove_dup(final_list)
 
 # Out file.
-# TODO Could just overwrite in file and then could wrap in exe for others.
+# TODO getcwd and output file there so anyone can run this easily.
 out_file = f'{folder}processed-{timestr}.csv'
 with open(out_file, 'w', encoding='utf-8', newline='') as output_file:
     writer = csv.writer(output_file)
     writer.writerow(headers)
     writer.writerows(final_list)
+
+#TODO add simple tkinter window to maybe ask company name and edit out file etc.
