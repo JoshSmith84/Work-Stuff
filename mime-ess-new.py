@@ -62,9 +62,8 @@ while i < len(rows):
                 del rows[j]
         else:
             j += 1
-    if conflict_detect > 0:
-        del rows[i]
-    elif conflict_detect == 0 and unanimous > 0:
+
+    if conflict_detect == 0 and unanimous > 0:
         if list_size <= 10000 and unanimous > 0:
             new_list.append(rows[i])
         elif 20000 >= list_size > 10000 and unanimous > 1:
