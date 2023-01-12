@@ -36,6 +36,7 @@ with open(in_file, encoding='utf-8', newline='') as csv_file:
     for row in reader:
         rows.append(row)
 
+list_size = len(rows)
 new_list = []
 final_list = []
 top_domains = ['google.com', 'gmail.com', 'yahoo.com',
@@ -44,7 +45,7 @@ top_domains = ['google.com', 'gmail.com', 'yahoo.com',
             ]
 
 
-# Only move unanimous block/allow to final list.
+# Only move unanimous block/allow to new list.
 i = 0
 while i < len(rows):
     j = i + 1
@@ -64,7 +65,18 @@ while i < len(rows):
     if conflict_detect > 0:
         del rows[i]
     elif conflict_detect == 0 and unanimous > 0:
-        new_list.append(rows[i])
+        if list_size < 10000 and unanimous > 0:
+            new_list.append(rows[i])
+        elif 20000 > list_size > 10000 and unanimous > 1:
+            new_list.append(rows[i])
+        elif 30000 > list_size > 20000 and unanimous > 2:
+            new_list.append(rows[i])
+        elif 40000 > list_size > 30000 and unanimous > 3:
+            new_list.append(rows[i])
+        elif 50000 > list_size > 40000 and unanimous > 4:
+            new_list.append(rows[i])
+        elif list_size > 50000 and unanimous > 5:
+            new_list.append(rows[i])
         i += 1
     else:
         i += 1
