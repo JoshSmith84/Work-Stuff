@@ -227,7 +227,8 @@ for msg in list(messages):
         font_header = Font(size=12, bold=True)
         encrypt_headers = [('Device Name', 'TPM Present?', 'TPM Active?',
                    'TPM Enabled?', 'Encryption Status')]
-        board_headers = [('Device Name', 'Arctic Wolf?', 'Blackpoint SNAP?',
+        board_headers = [('Device Name', 'WAN IP', 'Arctic Wolf?',
+                          'Blackpoint SNAP?',
                           'Umbrella?', 'Concierge?', 'Sophos?',
                           'AV Defender?', 'Competing AV?')]
         for sheet in wb.worksheets:
