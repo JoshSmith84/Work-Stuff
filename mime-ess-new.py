@@ -71,7 +71,7 @@ while i < len(rows):
 
 # Format unanimous list for cuda.
 for i in new_list:
-    if i[4] == 'Quarantine' or len(i[0]) > 40:
+    if i[4] == 'Quarantine':
         continue
     elif i[0] == '<>':
         continue
