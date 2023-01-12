@@ -28,7 +28,7 @@ headers = ['Email Address',
            ]
 
 
-# populate input list from csv rows. (makes list of lists)
+# populate input list from csv rows.
 with open(in_file, encoding='utf-8', newline='') as csv_file:
     for i in range(3):
         next(csv_file)
@@ -83,9 +83,7 @@ while i < len(rows):
 
 # Format unanimous list for cuda.
 for i in new_list:
-    if i[4] == 'Quarantine':
-        continue
-    elif i[0] == '<>':
+    if i[0] == '<>':
         continue
     elif i[0] in top_domains:
         continue
@@ -94,6 +92,8 @@ for i in new_list:
             final_list.append([f"{i[0]}", "block", "from Mimecast"])
         elif i[4] == 'Permit':
             final_list.append([f"{i[0]}", "exempt", "from Mimecast"])
+        elif i[4] == 'Quarantine':
+            final_list.append([f"{i[0]}", "quarantine", "from Mimecast"])
 
 # Remove any remaining true duplicates
 remove_dup(final_list)
