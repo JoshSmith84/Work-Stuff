@@ -1,3 +1,13 @@
+# mime-ess-new.py
+# Author: Josh Smith
+#
+# take output sender list from mimecast, edit down to unanimous votes,
+# and format for Barracuda
+# In mimecast, output the list with all columns.
+# Folder line should be edited for output
+# as selecting output file is not coded yet
+
+
 import csv
 import tkinter as tk
 from tkinter import filedialog
