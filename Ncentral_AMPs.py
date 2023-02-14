@@ -226,7 +226,9 @@ for msg in list(messages):
         board_sheet = wb.create_sheet('On-Offboard')
         font_header = Font(size=12, bold=True)
         encrypt_headers = [('Device Name', 'TPM Present?', 'TPM Active?',
-                   'TPM Enabled?', 'Encryption Status')]
+                   'TPM Enabled?', 'Encryption Status',
+                            'Media Type',
+                            )]
         board_headers = [('Device Name', 'Arctic Wolf?',
                           'Blackpoint SNAP?',
                           'Umbrella?', 'Concierge?', 'Sophos?',
@@ -353,6 +355,20 @@ for msg in list(messages):
         temp_files = os.listdir(client_temp)
         for f in temp_files:
             os.remove(client_temp + f)
+
+    # Handle media Type detection
+    elif job_name == 'Get-PhysicalDisk':
+        device_row = device_check(encrypt_sheet, device_name)
+        if device_row == '':
+            device_row = encrypt_sheet.max_row + 1
+            board_sheet.cell(row=device_row, column=1).value = device_name
+        if 'SSD' in msg.Body:
+            encrypt_sheet.cell(row=device_row, column=6).value = 'SSD'
+        elif 'HDD' in msg.Body:
+            encrypt_sheet.cell(row=device_row, column=6).value = 'HHD'
+        elif 'Unspecified' in msg.Body:
+            encrypt_sheet.cell(row=device_row, column=6).value = 'Unspecified'
+
 
     # Handle anything else right now
     else:
