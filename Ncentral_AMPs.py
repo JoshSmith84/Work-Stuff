@@ -4,7 +4,7 @@ while also keeping track of client_name
 and job details from output email body. Parse data,
 create/update master client_name excel files, move processed email when done.
 
-For TPM and BDE: text output only
+For TPM, BDE, and mediatype: text output only
 For software inventory amp, select "Send task output file in Email"
 
 One small issue:
@@ -17,7 +17,8 @@ case(though I could fold it...) for this to output into same worksheet.
 Regardless, if this method is not followed it will still parse
 client name from body, but that may end up being a site name...
 
-For now, support for TPM checks, BDE/encryption status, and live "asset scans"
+For now, support for TPM checks, BDE/encryption status, Drive mediatype(SSD,HHD)
+ and live "asset scans"
 
 Author: Josh Smith
 """
