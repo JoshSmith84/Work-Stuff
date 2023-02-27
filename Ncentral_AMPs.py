@@ -362,7 +362,7 @@ for msg in list(messages):
         device_row = device_check(encrypt_sheet, device_name)
         if device_row == '':
             device_row = encrypt_sheet.max_row + 1
-            board_sheet.cell(row=device_row, column=1).value = device_name
+            encrypt_sheet.cell(row=device_row, column=1).value = device_name
         if 'SSD' in msg.Body:
             encrypt_sheet.cell(row=device_row, column=6).value = 'SSD'
         elif 'HDD' in msg.Body:
