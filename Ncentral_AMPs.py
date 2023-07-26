@@ -72,7 +72,6 @@ db = 'U:\\Joshua\\Dropbox\\Dropbox\\Python\\Work Stuff\\work_stuff'
 with shelve.open(db) as shelf:
     email = shelf['josh_email']
     parent_f = shelf['out_folder']
-
 # Outlook and folder variables
 outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 inbox = outlook.Folders.Item(email).Folders[
@@ -137,6 +136,8 @@ tpm_regex = re.compile(r'''oscpresent:(.*?)
 zip_regex = re.compile(r"""^(.*?)(\.)(zip)$""")
 # regex to find txt files
 txt_regex = re.compile(r"""^(.*?)(\.)(txt)$""")
+fixed_rename_device =\
+    re.compile(r'''^.*(Executed By: Agent (.*?)) \[''')
 
 # iterate through all emails and process (Main block)
 for msg in list(messages):
@@ -188,6 +189,9 @@ for msg in list(messages):
     # Parse device name
     if device_mo:
         device_name = device_mo.group(1).strip()
+        if 'Customer:' in device_name:
+            device_mo = re.search(fixed_rename_device, msg.Body)
+            device_name = device_mo.group(2)
         logging.debug(f'Device name: {device_name}')
     else:
         with open(client_err_file, 'a') as file:
@@ -366,7 +370,7 @@ for msg in list(messages):
         if 'SSD' in msg.Body:
             encrypt_sheet.cell(row=device_row, column=6).value = 'SSD'
         elif 'HDD' in msg.Body:
-            encrypt_sheet.cell(row=device_row, column=6).value = 'HHD'
+            encrypt_sheet.cell(row=device_row, column=6).value = 'HDD'
         elif 'Unspecified' in msg.Body:
             encrypt_sheet.cell(row=device_row, column=6).value = 'Unspecified'
 
