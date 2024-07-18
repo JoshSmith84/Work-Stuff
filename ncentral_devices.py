@@ -16,7 +16,7 @@ my_filetypes = [('csv files', '.csv')]
 # Ask the user to select a single file name.
 in_file = filedialog.askopenfilename(parent=application_window,
                                     initialdir=os.getcwd(),
-                                    title="Please select an input file:",
+                                    title="Please select Nable device csv:",
                                     filetypes=my_filetypes)
 
 

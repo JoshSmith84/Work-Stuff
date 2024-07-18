@@ -41,7 +41,7 @@ my_filetypes = [('csv files', '.csv')]
 # Ask the user to select a single file name.
 in_file = filedialog.askopenfilename(parent=root,
                                      initialdir=os.getcwd(),
-                                     title="Please select an input file:",
+                                     title="Please select a mimecast list file:",
                                      filetypes=my_filetypes)
 # initialize input list
 rows = []

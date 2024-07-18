@@ -4,7 +4,7 @@ import csv
 def re_organize(raw: str, li: list):
     sender = ''
     for char in raw:
-        if char == ' ':
+        if char == '\n':
             li.append(sender)
             sender = ''
             continue
@@ -36,10 +36,18 @@ def set_ips(in_list: list, action: str):
 folder = 'C:\\temp\\'
 out_file = f'{folder}email_ess.csv'
 out_file2 = f'{folder}ip_ess.csv'
+allowed_in_file = f'{folder}allowed.txt'
+blocked_in_file = f'{folder}blocked.txt'
 
-allowed_senders_raw = ''
+with open(allowed_in_file, 'r') as all_input_file:
+    allowed_senders_raw = all_input_file.read()
+
+with open(blocked_in_file, 'r') as blo_input_file:
+    blocked_senders_raw = blo_input_file.read()
+
+# allowed_senders_raw = ''
 allowed_domains_raw = ''
-blocked_senders_raw = ''
+# blocked_senders_raw = ''
 blocked_domains_raw = ''
 blocked_ips_raw = ''
 
@@ -67,12 +75,12 @@ set_emails(blocked_domains_list, 'block')
 set_ips(blocked_ips_list, 'block')
 
 with open(out_file, 'w', encoding='utf-8', newline='') as output_file:
-    writer = csv.writer(output_file, quoting=csv.QUOTE_NONNUMERIC)
+    writer = csv.writer(output_file)
     writer.writerow(email_headers)
     writer.writerows(email_out_list)
 
 with open(out_file2, 'w', encoding='utf-8', newline='') as output_file:
-    writer = csv.writer(output_file, quoting=csv.QUOTE_NONNUMERIC)
+    writer = csv.writer(output_file)
     writer.writerow(ip_headers)
     writer.writerows(ip_out_list)
 
