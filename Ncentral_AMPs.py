@@ -32,6 +32,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, PatternFill
 import logging
+from tkinter import *
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %'
                                                 '(levelname)s - %'
                                                 '(message)s'
@@ -137,6 +138,8 @@ tpm_regex = re.compile(r'''oscpresent:(.*?)
 zip_regex = re.compile(r"""^(.*?)(\.)(zip)$""")
 # regex to find txt files
 txt_regex = re.compile(r"""^(.*?)(\.)(txt)$""")
+#regex to find date time specifcally returned by Last Boot Time amp
+boot_regex = re.compile(r"\b\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2} [AP]M\b")
 
 # iterate through all emails and process (Main block)
 for msg in list(messages):
@@ -228,7 +231,7 @@ for msg in list(messages):
         font_header = Font(size=12, bold=True)
         encrypt_headers = [('Device Name', 'TPM Present?', 'TPM Active?',
                    'TPM Enabled?', 'Encryption Status',
-                            'Media Type',
+                            'Media Type', 'Last Boot',
                             )]
         board_headers = [('Device Name', 'Arctic Wolf?',
                           'Blackpoint SNAP?',
@@ -370,6 +373,56 @@ for msg in list(messages):
         elif 'Unspecified' in msg.Body:
             encrypt_sheet.cell(row=device_row, column=6).value = 'Unspecified'
 
+    # Handle Last Boot Time reports
+    elif job_name == 'Last Boot Time':
+        device_row = device_check(encrypt_sheet, device_name)
+        if device_row == '':
+            device_row = encrypt_sheet.max_row + 1
+            encrypt_sheet.cell(row=device_row, column=1).value = device_name
+        boot_mo = re.search(boot_regex, msg.Body)
+        if boot_mo:
+            boot_var = boot_mo.group(0).strip()
+            encrypt_sheet.cell(row=device_row, column=7).value = boot_var
+
+    # Handle Online host pinged from DC (only Arrow Truck remediation for now)
+    elif job_name == 'ArrowAgentRemediation':
+        for attach in msg.Attachments:
+            mo = re.search(zip_regex, str(attach))
+            if mo:
+                # If found, save attachment
+                temp_file = client_temp + device_name + '_' + attach.FileName
+                attach.SaveAsFile(temp_file)
+            # Unzip file
+            with ZipFile(temp_file) as zip_obj:
+                zip_obj.extractall(path=client_temp)
+
+            # Skip the zip and only open txt
+            files = os.listdir(client_temp)
+            for f in files:
+                txt_mo = re.search(txt_regex, f)
+                if txt_mo:
+                    # open and parse
+                    with open(client_temp + f, 'r',
+                              encoding='utf-8') as out_file:
+                        hosts = [line.rstrip('\n') for line in out_file]
+            online_hosts = []
+            for i in hosts:
+                if 'up' in i:
+                    online_hosts.append(i)
+            if len(online_hosts) > 0:
+                app = Tk()
+                app.geometry("720x250")
+                app.title("Online hosts detected!")
+                txt_output = Text(app, height=10, width=30)
+                txt_output.pack(pady=30)
+                for item in online_hosts:
+                    txt_output.insert(END, item + "\n")
+                app.mainloop()
+
+        # Delete the temp files when finished.
+        temp_files = os.listdir(client_temp)
+        for f in temp_files:
+            os.remove(client_temp + f)
 
     # Handle anything else right now
     else:
