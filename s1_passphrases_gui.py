@@ -286,7 +286,6 @@ class MainPage(AppPage):
         sys.exit()
 
 
-
 class Application(tk.Tk):
     """Application root window"""
     def __init__(self, *args, **kwargs):
