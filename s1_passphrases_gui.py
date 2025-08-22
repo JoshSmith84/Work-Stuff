@@ -157,7 +157,15 @@ class MainPage(AppPage):
 
 
     def pull_results(self, base_url, api_key: str, site_id: str, decom):
+        """
+        Method to pull S1 passphrases from S1 portal.
 
+        param: base_url: Base URL of S1 portal. Only options right now are Ntiva and TPG
+        param: api_key: API key from S1 portal. The key must belong to a service account
+        that at least has admin access to the Site ID being pulled
+        param: site_id: Site ID of the client site in S1 portal
+        return: None
+        """
 
         s1_headers = {
             "Accept": "application/json",
@@ -210,6 +218,7 @@ class MainPage(AppPage):
                 del data
 
     def _on_run(self):
+        """Command to grab the Api Key and SiteID variables from the form and request from S1 portal"""
 
         if self._vars['Portal'].get() == 'Ntiva':
             self.portal_url = 'https://usea1-cw04mdr.sentinelone.net'
