@@ -86,14 +86,14 @@ class MainPage(AppPage):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._vars = {'Portal': tk.StringVar(None, 'TPG'),
+        self._vars = {'Portal': tk.StringVar(None, 'Ntiva'),
                       'Client Name': tk.StringVar(None, None),
                       'API': tk.StringVar(None, None),
                       'SiteID': tk.StringVar(None, None),
                       }
 
         self.output_folder = os.path.join(os.path.expanduser("~"), "Documents")
-        self.err_file = os.path.join(os.path.expanduser("~"), "Documents", "s1-passphrase-error.txt")
+        self.err_file = os.path.join(self.output_folder, "s1-passphrase-error.txt")
         self.portal_url = ''
         self.result_list = []
         self.fields = ["computerName", "domain", "passphrase", "portalStatus"]
@@ -260,6 +260,7 @@ class MainPage(AppPage):
         self.output_folder = filedialog.askdirectory(
             title='Choose output folder...',
         )
+        self.err_file = os.path.join(self.output_folder, "s1-passphrase-error.txt")
         ch_folder_diag.destroy()
 
         self.status.set(f'Output Folder set to: \n{self.output_folder}. '
@@ -292,7 +293,7 @@ class Application(tk.Tk):
         super().__init__(*args, **kwargs)
         self.m_page = ''
         self.main_label = ''
-        self.title(" S1 Passphrases - beta")
+        self.title(" S1 Passphrases v1.0")
         self.minsize(400, 350)
         self.main_page()
 
