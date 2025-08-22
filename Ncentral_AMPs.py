@@ -62,6 +62,16 @@ def device_check(wb_sheet, device: str) -> int:
     return device_row
 
 
+def header_config(sheet, headers):
+
+    font_header = Font(size=12, bold=True)
+    for row in headers:
+        sheet.append(row)
+    for cell in sheet['1:1']:
+        cell.font = font_header
+    sheet.freeze_panes = 'A2'
+
+
 logging.disable(logging.CRITICAL)
 logging.debug('Start of program\n')
 
@@ -140,6 +150,7 @@ zip_regex = re.compile(r"""^(.*?)(\.)(zip)$""")
 txt_regex = re.compile(r"""^(.*?)(\.)(txt)$""")
 #regex to find date time specifcally returned by Last Boot Time amp
 boot_regex = re.compile(r"\b\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2} [AP]M\b")
+tc_regex = re.compile(r'''Version=(.*?) ''')
 
 # iterate through all emails and process (Main block)
 for msg in list(messages):
@@ -228,7 +239,7 @@ for msg in list(messages):
         encrypt_sheet = wb['Sheet']
         encrypt_sheet.title = 'Encryption'
         board_sheet = wb.create_sheet('On-Offboard')
-        font_header = Font(size=12, bold=True)
+        tc_sheet = wb.create_sheet('Take Control Version')
         encrypt_headers = [('Device Name', 'TPM Present?', 'TPM Active?',
                    'TPM Enabled?', 'Encryption Status',
                             'Media Type', 'Last Boot',
@@ -237,26 +248,23 @@ for msg in list(messages):
                           'Blackpoint SNAP?',
                           'Umbrella?', 'Concierge?', 'Sophos?',
                           'AV Defender?', 'Competing AV?')]
+        tc_headers = [('Device Name', 'Take Control Version')]
         for sheet in wb.worksheets:
             for i in range(1, 9):
                 col = get_column_letter(i)
                 sheet.column_dimensions[col].width = 25
-        for row in encrypt_headers:
-            encrypt_sheet.append(row)
-        for row in board_headers:
-            board_sheet.append(row)
-        for cell in encrypt_sheet['1:1']:
-            cell.font = font_header
-        for cell in board_sheet['1:1']:
-            cell.font = font_header
-        encrypt_sheet.freeze_panes = 'A2'
-        board_sheet.freeze_panes = 'A2'
+
+        header_config(encrypt_sheet, encrypt_headers)
+        header_config(board_sheet, board_headers)
+        header_config(tc_sheet, tc_headers)
+
         wb.save(wb_file)
 
     # Load client workbook
     wb = load_workbook(wb_file)
     encrypt_sheet = wb['Encryption']
     board_sheet = wb['On-Offboard']
+    tc_sheet = wb['Take Control Version']
 
     # Handle TPM amp and populate spreadsheet
     if job_name == 'Windows TPM Monitoring':
@@ -423,6 +431,25 @@ for msg in list(messages):
         temp_files = os.listdir(client_temp)
         for f in temp_files:
             os.remove(client_temp + f)
+
+    elif job_name == 'Check Take Control Version':
+        device_row = device_check(tc_sheet, device_name)
+        mo = re.search(tc_regex, msg.Body)
+        tc_version = mo.group(1)
+
+        if device_row == '':
+            new_row = [(device_name, tc_version)]
+            device_row = tc_sheet.max_row + 1
+            for row in new_row:
+                tc_sheet.append(row)
+        else:
+            tc_sheet.cell(row=device_row, column=2).value = tc_version
+
+        # highlight any row with old er than 7.50.17
+        if tc_version != '7.50.17':
+            for cell in tc_sheet[device_row]:
+                cell.fill = gold_fill
+
 
     # Handle anything else right now
     else:
